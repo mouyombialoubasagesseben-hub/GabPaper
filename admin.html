@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GabPaper — Administration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="logo">
+    <div class="flag">
+      <span class="f1"></span>
+      <span class="f2"></span>
+      <span class="f3"></span>
+    </div>
+    GabPaper &nbsp;
+    <span class="badge" style="background:#7c3aed20; color:#7c3aed; font-size:0.7rem;">ADMIN</span>
+  </div>
+  <div class="nav-links">
+    <a href="#" class="active" onclick="showAdmin('dashboard', this)">📊 Dashboard</a>
+    <a href="#" onclick="showAdmin('demandes', this)">📄 Demandes</a>
+    <a href="#" onclick="showAdmin('users', this)">👥 Utilisateurs</a>
+    <a href="#" onclick="showAdmin('chat', this)">💬 Messages</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" style="background:#7c3aed">A</div>
+    <button class="btn-out" onclick="deconnexion()">Déconnexion</button>
+  </div>
+</nav>
+
+<div id="adm-dashboard" class="wrapper">
+  <div class="page-head">
+    <h2>📊 Tableau de bord</h2>
+    <p>Vue d'ensemble de toutes les demandes citoyennes</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-ico ico-g">📄</div>
+      <div><div class="stat-num" id="a-total">0</div><div class="stat-lbl">Total demandes</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-y">⏳</div>
+      <div><div class="stat-num" id="a-attente">0</div><div class="stat-lbl">En attente</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-b">🔄</div>
+      <div><div class="stat-num" id="a-cours">0</div><div class="stat-lbl">En cours</div></div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-g">✅</div>
+      <div><div class="stat-num" id="a-done">0</div><div class="stat-lbl">Terminées</div></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="sec-title">📋 Demandes récentes</div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>N°</th><th>Citoyen</th><th>Type</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody id="adm-recent"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title">📈 Répartition par type</div>
+      <div id="stats-types"></div>
+    </div>
+  </div>
+</div>
+
+<div id="adm-demandes" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>📄 Gestion des demandes</h2>
+    <p>Traitez et mettez à jour le statut des demandes</p>
+  </div>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div class="sec-title" style="margin-bottom:0">Toutes les demandes</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <select id="adm-filtre" onchange="chargerAdminDemandes()" style="padding:8px 12px; border:2px solid #e2e8f0; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none;">
+          <option value="">Tous les statuts</option>
+          <option>En attente</option>
+          <option>En cours</option>
+          <option>Terminée</option>
+          <option>Rejetée</option>
+        </select>
+        <select id="adm-filtre-type" onchange="chargerAdminDemandes()" style="padding:8px 12px; border:2px solid #e2e8f0; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none;">
+          <option value="">Tous les types</option>
+          <option>Carte Nationale d'Identité</option>
+          <option>Passeport</option>
+          <option>Acte de naissance</option>
+          <option>NIP / Récipissé</option>
+        </select>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>N°</th><th>Citoyen</th><th>Type</th><th>Mairie</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody id="adm-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="adm-users" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>👥 Gestion des utilisateurs</h2>
+    <p>Liste des citoyens inscrits sur la plateforme</p>
+  </div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Nom complet</th><th>Email</th><th>Téléphone</th><th>Inscrit le</th><th>Demandes</th></tr></thead>
+        <tbody id="users-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="adm-chat" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>💬 Messages citoyens</h2>
+    <p>Répondez aux messages des citoyens</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="sec-title">👥 Conversations</div>
+      <div id="chat-liste"></div>
+    </div>
+    <div class="card">
+      <div class="sec-title">💬 Conversation</div>
+      <div id="chat-conv" style="height:300px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; margin-bottom:14px;"></div>
+      <div id="chat-reply-zone" style="display:none;">
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="admin-chat-input" placeholder="Votre réponse..." onkeypress="if(event.key==='Enter') adminRepondre()" style="flex:1; padding:9px 12px; border:2px solid #e2e8f0; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.88rem; outline:none;">
+          <button onclick="adminRepondre()" style="background:var(--vert); color:white; border:none; border-radius:8px; padding:9px 14px; cursor:pointer; font-size:1rem;">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modal-statut" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal-statut').style.display='none'">✕</button>
+    <h3>✏️ Modifier le statut</h3>
+    <p id="modal-dem-info" style="color:var(--gris-txt); font-size:0.88rem; margin-bottom:18px;"></p>
+    <div style="background:var(--gris-bg); border-radius:9px; padding:14px; margin-bottom:16px;">
+      <p style="font-size:0.82rem; color:var(--gris-txt); margin-bottom:6px;"><strong>Motif du citoyen :</strong></p>
+      <p id="modal-motif-citoyen" style="font-size:0.88rem; color:var(--noir);">—</p>
+    </div>
+    <div class="form-group">
+      <label>Nouveau statut</label>
+      <select id="select-statut">
+        <option>En attente</option>
+        <option>En cours</option>
+        <option>Terminée</option>
+        <option>Rejetée</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Commentaire admin</label>
+      <textarea id="modal-comment" placeholder="Écrivez votre réponse au citoyen..."></textarea>
+    </div>
+    <input type="hidden" id="modal-dem-id">
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-statut').style.display='none'">Annuler</button>
+      <button class="btn btn-primary" onclick="appliquerStatut()">✅ Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 GabPaper — Interface Administration &nbsp;|&nbsp;
+  <a href="index.html">Retour accueil</a> &nbsp;|&nbsp;
+  Développé par <strong style="color:#FCD116">Alouba Sagesse</strong> &nbsp;|&nbsp;
+  Pour plus d'informations, nous vous prions de contacter le :  <a href="tel:+241077622457" style="color:#FCD116">+241 077 62 24 57</a>
+</footer>
+
+<script src="app.js"></script>
+<script>
+
+requireAdmin();
+chargerAdminStats();
+chargerAdminRecent();
+chargerStatsTypes();
+
+let chatUserActif = null;
+
+function showAdmin(sec, el) {
+  ['dashboard','demandes','users','chat'].forEach(function(s) {
+    document.getElementById('adm-' + s).style.display = 'none';
+  });
+  document.querySelectorAll('.nav-links a').forEach(function(a){ a.classList.remove('active'); });
+  document.getElementById('adm-' + sec).style.display = 'block';
+  el.classList.add('active');
+  if(sec === 'demandes') chargerAdminDemandes();
+  if(sec === 'users')    chargerUsers();
+  if(sec === 'chat')     chargerChatListe();
+}
+
+function chargerAdminStats() {
+  let all = getDemandes();
+  document.getElementById('a-total').textContent   = all.length;
+  document.getElementById('a-attente').textContent = all.filter(function(d){ return d.statut === "En attente"; }).length;
+  document.getElementById('a-cours').textContent   = all.filter(function(d){ return d.statut === "En cours"; }).length;
+  document.getElementById('a-done').textContent    = all.filter(function(d){ return d.statut === "Terminée"; }).length;
+}
+
+function chargerAdminRecent() {
+  let all   = getDemandes().slice(-8).reverse();
+  let tbody = document.getElementById('adm-recent');
+  if(all.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="e-icon">📭</div><h4>Aucune demande</h4></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = all.map(function(d) {
+    return '<tr><td><span class="id-tag">' + d.id + '</span></td><td>' + d.userNom + '</td><td>' + d.type + '</td><td>' + badgeStatut(d.statut) + '</td><td><button class="btn btn-secondary btn-sm" onclick="ouvrirModalStatut(\'' + d.id + '\')">✏️ Traiter</button></td></tr>';
+  }).join('');
+}
+
+function chargerStatsTypes() {
+  let all   = getDemandes();
+  let types = ["Carte Nationale d'Identité","Passeport","Acte de naissance","NIP / Récipissé"];
+  let icons = ["🪪","📘","📜","🔢"];
+  let el    = document.getElementById('stats-types');
+  el.innerHTML = types.map(function(t, i) {
+    let count = all.filter(function(d){ return d.type === t; }).length;
+    let pct   = all.length ? Math.round((count / all.length) * 100) : 0;
+    return '<div style="margin-bottom:16px;"><div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:5px;"><span>' + icons[i] + ' ' + t + '</span><strong>' + count + '</strong></div><div style="background:#f1f5f9;border-radius:10px;height:8px;overflow:hidden;"><div style="background:var(--vert);height:100%;width:' + pct + '%;border-radius:10px;"></div></div></div>';
+  }).join('');
+}
+
+function chargerAdminDemandes() {
+  let filtre     = document.getElementById('adm-filtre').value;
+  let filtreType = document.getElementById('adm-filtre-type').value;
+  let all = getDemandes();
+  if(filtre)     all = all.filter(function(d){ return d.statut === filtre; });
+  if(filtreType) all = all.filter(function(d){ return d.type === filtreType; });
+  all.reverse();
+  let tbody = document.getElementById('adm-tbody');
+  if(all.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty"><div class="e-icon">📭</div><h4>Aucune demande</h4></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = all.map(function(d) {
+    return '<tr><td><span class="id-tag">' + d.id + '</span></td><td>' + d.userNom + '</td><td>' + d.type + '</td><td style="font-size:0.8rem">' + d.mairie + '</td><td>' + d.date + '</td><td>' + badgeStatut(d.statut) + '</td><td><button class="btn btn-secondary btn-sm" onclick="ouvrirModalStatut(\'' + d.id + '\')">✏️ Traiter</button></td></tr>';
+  }).join('');
+}
+
+function chargerUsers() {
+  let users = getUsers();
+  let all   = getDemandes();
+  let tbody = document.getElementById('users-tbody');
+  if(users.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty"><div class="e-icon">👥</div><h4>Aucun utilisateur</h4></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(function(u) {
+    let nbDem = all.filter(function(d){ return d.userId === u.id; }).length;
+    return '<tr><td><span class="id-tag">' + u.id + '</span></td><td>' + u.prenom + ' ' + u.nom + '</td><td>' + u.email + '</td><td>' + (u.tel||'—') + '</td><td>' + (u.dateInscription||'—') + '</td><td><span class="badge badge-progress">' + nbDem + ' demande(s)</span></td></tr>';
+  }).join('');
+}
+
+function ouvrirModalStatut(id) {
+  var d = getDemandes().find(function(x){ return x.id === id; });
+  if(!d) return;
+  document.getElementById('modal-dem-id').value  = id;
+  document.getElementById('select-statut').value = d.statut;
+  document.getElementById('modal-comment').value = d.reponseAdmin || '';
+  document.getElementById('modal-dem-info').textContent = d.type + " — " + d.userNom + " (" + d.date + ")";
+  document.getElementById('modal-motif-citoyen').textContent = d.motif || 'Aucun motif renseigné';
+  document.getElementById('modal-statut').style.display = 'flex';
+}
+
+function appliquerStatut() {
+  let id           = document.getElementById('modal-dem-id').value;
+  let statut       = document.getElementById('select-statut').value;
+  let reponseAdmin = document.getElementById('modal-comment').value.trim();
+  let all = getDemandes().map(function(d){
+    return d.id === id ? Object.assign({},d,{statut:statut,reponseAdmin:reponseAdmin}) : d;
+  });
+  saveDemandes(all);
+  document.getElementById('modal-statut').style.display = 'none';
+  chargerAdminStats();
+  chargerAdminRecent();
+  chargerStatsTypes();
+  chargerAdminDemandes();
+}
+
+function chargerChatListe() {
+  let users = getUsers();
+  let el    = document.getElementById('chat-liste');
+  if(users.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">💬</div><h4>Aucune conversation</h4></div>';
+    return;
+  }
+  el.innerHTML = users.map(function(u) {
+    let msgs    = JSON.parse(localStorage.getItem('gab_chat_' + u.id) || '[]');
+    let nonLu   = msgs.filter(function(m){ return !m.lu && m.from === 'citoyen'; }).length;
+    let dernier = msgs.length ? msgs[msgs.length-1].texte : 'Aucun message';
+    return '<div class="mairie-item" onclick="ouvrirConv(\'' + u.id + '\')">'
+      + '<span style="font-size:1.4rem">👤</span>'
+      + '<div style="flex:1;">'
+      + '<strong style="font-size:0.88rem">' + u.prenom + ' ' + u.nom + '</strong>'
+      + (nonLu > 0 ? ' <span class="badge badge-wait">' + nonLu + ' nouveau</span>' : '')
+      + '<div style="font-size:0.76rem;color:var(--gris-txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">' + dernier + '</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function ouvrirConv(userId) {
+  chatUserActif = userId;
+  let msgs = JSON.parse(localStorage.getItem('gab_chat_' + userId) || '[]');
+  msgs = msgs.map(function(m){ return Object.assign({},m,{lu:true}); });
+  localStorage.setItem('gab_chat_' + userId, JSON.stringify(msgs));
+  let el = document.getElementById('chat-conv');
+  if(msgs.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:var(--gris-txt);font-size:0.82rem;">Aucun message</div>';
+  } else {
+    el.innerHTML = msgs.map(function(m) {
+      let align = m.from === 'admin' ? 'align-self:flex-end;background:var(--vert);color:white;' : 'align-self:flex-start;background:var(--gris-bg);color:var(--noir);';
+      return '<div style="max-width:80%;padding:8px 12px;border-radius:12px;font-size:0.85rem;line-height:1.5;' + align + '">'
+        + m.texte + '<div style="font-size:0.68rem;opacity:0.65;margin-top:3px;">' + m.heure + '</div></div>';
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+  }
+  document.getElementById('chat-reply-zone').style.display = 'block';
+  chargerChatListe();
+}
+
+function adminRepondre() {
+  if(!chatUserActif) return;
+  let input = document.getElementById('admin-chat-input');
+  let texte = input.value.trim();
+  if(!texte) return;
+  let msgs = JSON.parse(localStorage.getItem('gab_chat_' + chatUserActif) || '[]');
+  msgs.push({
+    from: 'admin',
+    texte: texte,
+    heure: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}),
+    lu: true
+  });
+  localStorage.setItem('gab_chat_' + chatUserActif, JSON.stringify(msgs));
+  input.value = '';
+  ouvrirConv(chatUserActif);
+}
+
+</script>
+
+</body>
+</html>

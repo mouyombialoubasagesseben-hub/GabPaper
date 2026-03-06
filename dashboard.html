@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GabPaper — Mon espace</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="logo">
+    <div class="flag">
+      <span class="f1"></span>
+      <span class="f2"></span>
+      <span class="f3"></span>
+    </div>
+    GabPaper
+  </div>
+  <div class="nav-links">
+    <a href="#" class="active" onclick="afficherSection('accueil')">🏠 Accueil</a>
+    <a href="#" onclick="afficherSection('demandes')">📄 Mes demandes</a>
+    <a href="#" onclick="afficherSection('nouvelle')">➕ Nouvelle demande</a>
+    <a href="#" onclick="afficherSection('carte')">Mairies</a>
+    <a href="#" onclick="afficherSection('profil')">👤 Profil</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar-sm" id="nav-avatar" onclick="afficherSection('profil')">?</div>
+    <button class="btn-out" onclick="deconnexion()">Déconnexion</button>
+  </div>
+</nav>
+
+<div id="sec-accueil" class="wrapper">
+  <div class="page-head">
+    <h2 id="welcome-title">Bonjour !!!</h2>
+    <p>Bienvenue sur votre espace administratif en ligne</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-ico ico-g">📄</div>
+      <div>
+        <div class="stat-num" id="s-total">0</div>
+        <div class="stat-lbl">Total demandes</div>
+      </div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-y">⏳</div>
+      <div>
+        <div class="stat-num" id="s-attente">0</div>
+        <div class="stat-lbl">En attente</div>
+      </div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-b">🔄</div>
+      <div>
+        <div class="stat-num" id="s-cours">0</div>
+        <div class="stat-lbl">En cours</div>
+      </div>
+    </div>
+    <div class="stat">
+      <div class="stat-ico ico-g">✅</div>
+      <div>
+        <div class="stat-num" id="s-done">0</div>
+        <div class="stat-lbl">Terminées</div>
+      </div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="sec-title">📋 Dernières demandes</div>
+      <div id="dash-table">
+        <div class="empty">
+          <div class="e-icon">📭</div>
+          <h4>Aucune demande</h4>
+          <p>Commencez par soumettre une demande</p>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec-title">Actions rapides</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-primary btn-full" onclick="afficherSection('nouvelle')">➕ Nouvelle demande</button>
+        <button class="btn btn-secondary btn-full" onclick="afficherSection('demandes')">📄 Voir mes demandes</button>
+        <button class="btn btn-secondary btn-full" onclick="afficherSection('carte')">📍 Localiser une mairie</button>
+        <button class="btn btn-secondary btn-full" onclick="afficherSection('profil')">👤 Mon profil</button>
+      </div>
+      <div style="margin-top:20px; padding:14px; background:var(--vert-light); border-radius:9px;">
+        <p style="font-size:0.82rem; color:var(--vert-dark); line-height:1.6;">
+          💡 Suivez l'avancement de vos demandes en temps réel depuis l'onglet "Mes demandes".
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sec-demandes" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>📄 Mes demandes</h2>
+    <p>Historique et suivi de toutes vos demandes</p>
+  </div>
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+      <div class="sec-title" style="margin-bottom:0">Liste des demandes</div>
+      <div style="display:flex; gap:8px;">
+        <select id="filtre-statut" onchange="chargerDemandesTable()" style="padding:8px 12px; border:2px solid #e2e8f0; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.85rem; outline:none;">
+          <option value="">Tous les statuts</option>
+          <option>En attente</option>
+          <option>En cours</option>
+          <option>Terminée</option>
+          <option>Rejetée</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="afficherSection('nouvelle')">➕ Nouvelle</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>N° Demande</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-demandes">
+          <tr>
+            <td colspan="5">
+              <div class="empty">
+                <div class="e-icon">📭</div>
+                <h4>Aucune demande trouvée</h4>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="sec-nouvelle" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>➕ Nouvelle demande</h2>
+    <p>Remplissez le formulaire correspondant à votre document</p>
+  </div>
+  <div class="card" style="margin-bottom:18px;">
+    <div class="sec-title">1. Choisissez le type de document</div>
+    <div class="type-grid">
+      <div class="type-card sel" onclick="selectType(this,'cni')">
+        <div class="t-icon">🪪</div>
+        <div>
+          <strong>Carte Nationale d'Identité</strong>
+          <span>Renouvellement ou première demande</span>
+        </div>
+      </div>
+      <div class="type-card" onclick="selectType(this,'passeport')">
+        <div class="t-icon">📘</div>
+        <div>
+          <strong>Passeport</strong>
+          <span>Passeport biométrique gabonais</span>
+        </div>
+      </div>
+      <div class="type-card" onclick="selectType(this,'acte')">
+        <div class="t-icon">📜</div>
+        <div>
+          <strong>Acte de naissance</strong>
+          <span>Copie intégrale ou extrait</span>
+        </div>
+      </div>
+      <div class="type-card" onclick="selectType(this,'nip')">
+        <div class="t-icon">🔢</div>
+        <div>
+          <strong>NIP / Récipissé</strong>
+          <span>Numéro d'Identification Personnel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-title">2. Remplissez le formulaire</div>
+    <div id="alert-demande"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom</label>
+        <input type="text" id="d-prenom" placeholder="Jean">
+      </div>
+      <div class="form-group">
+        <label>Nom de famille</label>
+        <input type="text" id="d-nom" placeholder="Ondo">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Date de naissance</label>
+        <input type="date" id="d-ddn">
+      </div>
+      <div class="form-group">
+        <label>Lieu de naissance</label>
+        <input type="text" id="d-lieu" placeholder="Libreville">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Commune</label>
+        <select id="d-commune">
+          <option>Libreville</option>
+          <option>Port-Gentil</option>
+          <option>Franceville</option>
+          <option>Oyem</option>
+          <option>Moanda</option>
+          <option>Lambaréné</option>
+          <option>Tchibanga</option>
+          <option>Koulamoutou</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mairie de dépôt</label>
+        <select id="d-mairie">
+          <option>Mairie du 1er Arrondissement</option>
+          <option>Mairie du 2ème Arrondissement</option>
+          <option>Mairie du 3ème Arrondissement</option>
+          <option>Mairie du 4ème Arrondissement</option>
+          <option>Mairie du 5ème Arrondissement</option>
+          <option>Mairie du 6ème Arrondissement</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Motif / Informations complémentaires</label>
+      <textarea id="d-motif" placeholder="Précisez toute information utile..."></textarea>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="soumettreDeamnde()">📤 Soumettre la demande</button>
+      <button class="btn btn-secondary" onclick="resetForm()">🔄 Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+<div id="sec-carte" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>Localiser les mairies</h2>
+    <p>Trouvez la mairie la plus proche de chez vous à Libreville</p>
+  </div>
+  <div class="grid2">
+    <div class="card" style="padding:0; overflow:hidden;">
+      <div id="map"></div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="sec-title">🏛️ Mairies de Libreville</div>
+        <div id="liste-mairies"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="sec-profil" class="wrapper" style="display:none">
+  <div class="page-head">
+    <h2>👤 Mon profil</h2>
+    <p>Gérez vos informations personnelles</p>
+  </div>
+  <div class="profile-head">
+    <div class="avatar-lg" id="profil-avatar">?</div>
+    <div>
+      <h3 id="profil-nom" style="font-size:1.4rem; margin-bottom:4px;"></h3>
+      <p id="profil-email" style="opacity:0.75; font-size:0.9rem;"></p>
+      <p id="profil-date" style="opacity:0.55; font-size:0.82rem; margin-top:4px;"></p>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="sec-title">Modifier mes informations</div>
+      <div id="alert-profil"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" id="p-prenom">
+        </div>
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" id="p-nom">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="p-email">
+      </div>
+      <div class="form-group">
+        <label>Téléphone</label>
+        <input type="tel" id="p-tel">
+      </div>
+      <button class="btn btn-primary" onclick="sauvegarderProfil()">Sauvegarder</button>
+    </div>
+    <div class="card">
+      <div class="sec-title">Changer le mot de passe</div>
+      <div id="alert-mdp"></div>
+      <div class="form-group">
+        <label>Ancien mot de passe</label>
+        <input type="password" id="p-old-mdp" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label>Nouveau mot de passe</label>
+        <input type="password" id="p-new-mdp" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label>Confirmer</label>
+        <input type="password" id="p-new-mdp2" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary" onclick="changerMdp()">²Modifier</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-detail" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal-detail').style.display='none'">✕</button>
+    <h3>📄 Détail de la demande</h3>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<footer>
+  © 2026 GabPaper — République Gabonaise   —  Institut Nationale de la Poste des Technologies de l'Information et de la Communication &nbsp;|&nbsp;
+  <a href="#" onclick="ouvrirModal('cgu'); return false;">CGU</a> &nbsp;|&nbsp;
+  <a href="#" onclick="ouvrirModal('privacy'); return false;">Confidentialité</a> &nbsp;|&nbsp;
+  Développé par <strong style="color:#FCD116">Alouba Sagesse</strong> &nbsp;|&nbsp;
+  Pour plus d'informations, nous vous prions de contacter le :  <a href="tel:+241077622457" style="color:#FCD116">+241 077 62 24 57</a>
+</footer>
+
+<button onclick="toggleChat()" style="position:fixed; bottom:24px; right:24px; width:54px; height:54px; border-radius:50%; background:var(--vert); color:white; border:none; font-size:1.4rem; cursor:pointer; box-shadow:0 4px 16px rgba(0,158,96,0.4); z-index:150; display:flex; align-items:center; justify-content:center;">💬</button>
+
+<div id="chat-box" style="position:fixed; bottom:90px; right:24px; width:320px; background:white; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.15); z-index:150; display:none; flex-direction:column; overflow:hidden;">
+  <div style="background:var(--vert); color:white; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;">
+    <div>
+      <strong style="font-size:0.95rem;">Support GabPaper</strong><br>
+      <span style="font-size:0.75rem; opacity:0.8;">Nous répondons rapidement</span>
+    </div>
+    <button onclick="toggleChat()" style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+  </div>
+  <div id="chat-messages" style="height:240px; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;"></div>
+  <div style="display:flex; gap:8px; padding:12px; border-top:1px solid #f1f5f9;">
+    <input type="text" id="chat-input" placeholder="Votre message..." onkeypress="if(event.key==='Enter') envoyerMessage()" style="flex:1; padding:9px 12px; border:2px solid #e2e8f0; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.88rem; outline:none;">
+    <button onclick="envoyerMessage()" style="background:var(--vert); color:white; border:none; border-radius:8px; padding:9px 14px; cursor:pointer; font-size:1rem;">➤</button>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+<script>
+
+requireAuth();
+let typeSelectionne = "cni";
+let mapInitialisee  = false;
+let currentUser     = getUser();
+
+document.getElementById('nav-avatar').textContent   = currentUser.prenom[0].toUpperCase();
+document.getElementById('welcome-title').textContent = "Bonjour, " + currentUser.prenom + " 👋";
+
+chargerStats();
+chargerDashTable();
+
+function afficherSection(nom) {
+  ['accueil','demandes','nouvelle','carte','profil'].forEach(function(s) {
+    document.getElementById('sec-' + s).style.display = 'none';
+  });
+  document.querySelectorAll('.nav-links a').forEach(function(a) { a.classList.remove('active'); });
+  document.getElementById('sec-' + nom).style.display = 'block';
+  if(nom === 'demandes') chargerDemandesTable();
+  if(nom === 'nouvelle') resetForm();
+  if(nom === 'carte' && !mapInitialisee) initCarte();
+  if(nom === 'profil') chargerProfil();
+}
+
+function chargerStats() {
+  let all = getDemandes().filter(function(d){ return d.userId === currentUser.id; });
+  document.getElementById('s-total').textContent   = all.length;
+  document.getElementById('s-attente').textContent = all.filter(function(d){ return d.statut === "En attente"; }).length;
+  document.getElementById('s-cours').textContent   = all.filter(function(d){ return d.statut === "En cours"; }).length;
+  document.getElementById('s-done').textContent    = all.filter(function(d){ return d.statut === "Terminée"; }).length;
+}
+
+function chargerDashTable() {
+  let all = getDemandes().filter(function(d){ return d.userId === currentUser.id; }).slice(-5).reverse();
+  let el  = document.getElementById('dash-table');
+  if(all.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="e-icon">📭</div><h4>Aucune demande</h4><p>Cliquez sur "Nouvelle demande" pour commencer</p></div>';
+    return;
+  }
+  el.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th>N°</th><th>Type</th><th>Date</th><th>Statut</th></tr></thead><tbody>'
+    + all.map(function(d) {
+      return '<tr><td><span class="id-tag">' + d.id + '</span></td><td>' + d.type + '</td><td>' + d.date + '</td><td>' + badgeStatut(d.statut) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+
+function chargerDemandesTable() {
+  let filtre = document.getElementById('filtre-statut').value;
+  let all    = getDemandes().filter(function(d){ return d.userId === currentUser.id; });
+  if(filtre) all = all.filter(function(d){ return d.statut === filtre; });
+  all.reverse();
+  var tbody = document.getElementById('tbody-demandes');
+  if(all.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty"><div class="e-icon">📭</div><h4>Aucune demande</h4></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = all.map(function(d) {
+    return '<tr><td><span class="id-tag">' + d.id + '</span></td><td>' + d.type + '</td><td>' + d.date + '</td><td>' + badgeStatut(d.statut) + '</td><td><button class="btn btn-secondary btn-sm" onclick="voirDetail(\'' + d.id + '\')">👁 Voir</button></td></tr>';
+  }).join('');
+}
+
+function selectType(el, type) {
+  document.querySelectorAll('.type-card').forEach(function(c){ c.classList.remove('sel'); });
+  el.classList.add('sel');
+  typeSelectionne = type;
+}
+
+function soumettreDeamnde() {
+  let prenom  = document.getElementById('d-prenom').value.trim();
+  let nom     = document.getElementById('d-nom').value.trim();
+  let ddn     = document.getElementById('d-ddn').value;
+  let lieu    = document.getElementById('d-lieu').value.trim();
+  let commune = document.getElementById('d-commune').value;
+  let mairie  = document.getElementById('d-mairie').value;
+  let motif   = document.getElementById('d-motif').value.trim();
+  let alDiv   = document.getElementById('alert-demande');
+
+  if(!prenom || !nom || !ddn || !lieu) {
+    alDiv.innerHTML = '<div class="alert alert-error"> Remplissez tous les champs obligatoires.</div>';
+    return;
+  }
+
+  let typeLabels = { cni:"Carte Nationale d'Identité", passeport:"Passeport", acte:"Acte de naissance", nip:"NIP / Récipissé" };
+
+  let demande = {
+    id: "DEM-" + Date.now(),
+    userId: currentUser.id,
+    userNom: currentUser.prenom + " " + currentUser.nom,
+    type: typeLabels[typeSelectionne],
+    prenom:prenom, nom:nom, ddn:ddn, lieu:lieu,
+    commune:commune, mairie:mairie, motif:motif,
+    statut: "En attente",
+    reponseAdmin: "",
+    date: new Date().toLocaleDateString('fr-FR'),
+    dateTs: Date.now()
+  };
+
+  let all = getDemandes();
+  all.push(demande);
+  saveDemandes(all);
+  alDiv.innerHTML = '<div class="alert alert-success">✅ Demande soumise ! Numéro : <strong>' + demande.id + '</strong></div>';
+  chargerStats();
+  setTimeout(function(){ afficherSection('demandes'); }, 1800);
+}
+
+function resetForm() {
+  ['d-prenom','d-nom','d-ddn','d-lieu','d-motif'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('alert-demande').innerHTML = '';
+}
+
+function voirDetail(id) {
+  let d = getDemandes().find(function(x){ return x.id === id; });
+  if(!d) return;
+  let etapes = ["En attente","En cours","Terminée"];
+  let step   = etapes.indexOf(d.statut);
+  let tracker = '<div class="tracker">'
+    + '<div class="t-step"><div class="t-circle done">1</div><div class="t-label">Soumise</div></div>'
+    + '<div class="t-line done"></div>'
+    + '<div class="t-step"><div class="t-circle ' + (step>=1?(step===1?'active':'done'):'') + '">2</div><div class="t-label">En cours</div></div>'
+    + '<div class="t-line ' + (step>=2?'done':'') + '"></div>'
+    + '<div class="t-step"><div class="t-circle ' + (step>=2?'done':'') + '">3</div><div class="t-label">Terminée</div></div>'
+    + '</div>';
+  let reponseAdmin = d.reponseAdmin ? '<tr><td style="padding:7px 0;color:var(--gris-txt)">Réponse admin</td><td style="color:var(--vert-dark);font-weight:600;">' + d.reponseAdmin + '</td></tr>' : '';
+  let motifCitoyen = d.motif ? '<tr><td style="padding:7px 0;color:var(--gris-txt)">Votre motif</td><td>' + d.motif + '</td></tr>' : '';
+  document.getElementById('detail-content').innerHTML =
+    '<p style="margin-bottom:16px;">' + badgeStatut(d.statut) + '</p>' + tracker +
+    '<table style="width:100%;font-size:0.88rem;margin-top:16px;">' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt);width:45%">N° Demande</td><td><span class="id-tag">' + d.id + '</span></td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Type</td><td>' + d.type + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Nom complet</td><td>' + d.prenom + ' ' + d.nom + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Date de naissance</td><td>' + d.ddn + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Lieu de naissance</td><td>' + d.lieu + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Commune</td><td>' + d.commune + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Mairie</td><td>' + d.mairie + '</td></tr>' +
+    '<tr><td style="padding:7px 0;color:var(--gris-txt)">Date soumission</td><td>' + d.date + '</td></tr>' +
+    motifCitoyen + reponseAdmin + '</table>';
+  document.getElementById('modal-detail').style.display = 'flex';
+}
+
+function initCarte() {
+  mapInitialisee = true;
+  let map = L.map('map').setView([0.3942, 9.4536], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap' }).addTo(map);
+  let listeEl = document.getElementById('liste-mairies');
+  listeEl.innerHTML = '';
+  mairies.forEach(function(m) {
+    L.marker([m.lat, m.lng]).addTo(map).bindPopup('<strong>' + m.nom + '</strong><br>' + m.adresse + '<br><small>' + m.tel + '</small>');
+    listeEl.innerHTML += '<div class="mairie-item"><span style="font-size:1.4rem">🏛️</span><div><strong style="font-size:0.88rem">' + m.nom + '</strong><div style="font-size:0.78rem;color:var(--gris-txt)">' + m.adresse + ' — ' + m.tel + '</div></div></div>';
+  });
+}
+
+function chargerProfil() {
+  let u = getUser();
+  document.getElementById('profil-avatar').textContent = u.prenom[0].toUpperCase();
+  document.getElementById('profil-nom').textContent    = u.prenom + " " + u.nom;
+  document.getElementById('profil-email').textContent  = u.email;
+  document.getElementById('profil-date').textContent   = "Inscrit le " + (u.dateInscription || "—");
+  document.getElementById('p-prenom').value = u.prenom;
+  document.getElementById('p-nom').value    = u.nom;
+  document.getElementById('p-email').value  = u.email;
+  document.getElementById('p-tel').value    = u.tel || '';
+}
+
+function sauvegarderProfil() {
+  let u = getUser();
+  u.prenom = document.getElementById('p-prenom').value.trim();
+  u.nom    = document.getElementById('p-nom').value.trim();
+  u.email  = document.getElementById('p-email').value.trim();
+  u.tel    = document.getElementById('p-tel').value.trim();
+  let users = getUsers().map(function(x){ return x.id === u.id ? Object.assign({},x,u) : x; });
+  localStorage.setItem("gab_users", JSON.stringify(users));
+  localStorage.setItem("gab_user",  JSON.stringify(u));
+  document.getElementById('alert-profil').innerHTML = '<div class="alert alert-success">✅ Profil mis à jour !</div>';
+  document.getElementById('nav-avatar').textContent = u.prenom[0].toUpperCase();
+  chargerProfil();
+  setTimeout(function(){ document.getElementById('alert-profil').innerHTML = ''; }, 2500);
+}
+
+function changerMdp() {
+  let u     = getUser();
+  let old   = document.getElementById('p-old-mdp').value;
+  let nw    = document.getElementById('p-new-mdp').value;
+  let nw2   = document.getElementById('p-new-mdp2').value;
+  let alDiv = document.getElementById('alert-mdp');
+  if(old !== u.password) { alDiv.innerHTML = '<div class="alert alert-error">❌ Ancien mot de passe incorrect.</div>'; return; }
+  if(nw !== nw2)         { alDiv.innerHTML = '<div class="alert alert-error">❌ Les mots de passe ne correspondent pas.</div>'; return; }
+  if(nw.length < 6)      { alDiv.innerHTML = '<div class="alert alert-error">❌ Minimum 6 caractères.</div>'; return; }
+  u.password = nw;
+  let users = getUsers().map(function(x){ return x.id === u.id ? Object.assign({},x,{password:nw}) : x; });
+  localStorage.setItem("gab_users", JSON.stringify(users));
+  localStorage.setItem("gab_user",  JSON.stringify(u));
+  alDiv.innerHTML = '<div class="alert alert-success">✅ Mot de passe modifié !</div>';
+  ['p-old-mdp','p-new-mdp','p-new-mdp2'].forEach(function(id){ document.getElementById(id).value = ''; });
+  setTimeout(function(){ alDiv.innerHTML = ''; }, 2500);
+}
+
+function toggleChat() {
+  let box = document.getElementById('chat-box');
+  box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+  if(box.style.display === 'flex') chargerMessages();
+}
+
+function chargerMessages() {
+  let msgs = JSON.parse(localStorage.getItem('gab_chat_' + currentUser.id) || '[]');
+  let el   = document.getElementById('chat-messages');
+  if(msgs.length === 0) {
+    el.innerHTML = '<div style="text-align:center;color:var(--gris-txt);font-size:0.82rem;margin-top:20px;">👋 Bonjour ! Comment pouvons-nous vous aider ?</div>';
+    return;
+  }
+  el.innerHTML = msgs.map(function(m) {
+    let align = m.from === 'citoyen' ? 'align-self:flex-end;background:var(--vert);color:white;' : 'align-self:flex-start;background:var(--gris-bg);color:var(--noir);';
+    return '<div style="max-width:80%;padding:8px 12px;border-radius:12px;font-size:0.85rem;line-height:1.5;' + align + '">'
+      + m.texte + '<div style="font-size:0.68rem;opacity:0.65;margin-top:3px;">' + m.heure + '</div></div>';
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+function envoyerMessage() {
+  let input = document.getElementById('chat-input');
+  let texte = input.value.trim();
+  if(!texte) return;
+  let msgs = JSON.parse(localStorage.getItem('gab_chat_' + currentUser.id) || '[]');
+  msgs.push({
+    from: 'citoyen',
+    texte: texte,
+    heure: new Date().toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}),
+    userId: currentUser.id,
+    userNom: currentUser.prenom + ' ' + currentUser.nom,
+    lu: false
+  });
+  localStorage.setItem('gab_chat_' + currentUser.id, JSON.stringify(msgs));
+  input.value = '';
+  chargerMessages();
+}
+
+</script>
+
+</body>
+</html>

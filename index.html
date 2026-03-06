@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GabPaper — Connexion</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-page">
+
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div>
+        <div class="auth-brand-name">GabPaper</div>
+        <div class="auth-brand-sub">République Gabonaise</div>
+      </div>
+    </div>
+    <h2>Vos démarches<br>administratives<br><span>simplifiées.</span></h2>
+    <p>Soumettez et suivez vos demandes de documents officiels depuis chez vous.</p>
+    <div class="features">
+      <div class="feat"><div class="feat-icon"></div> CNI, Passeport, Acte de naissance, NIP</div>
+      <div class="feat"><div class="feat-icon"></div> Localisez la mairie la plus proche</div>
+      <div class="feat"><div class="feat-icon"></div> Suivi en temps réel de vos demandes</div>
+      <div class="feat"><div class="feat-icon"></div> Données sécurisées et confidentielles</div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-box">
+      <div class="tabs">
+        <div class="tab active" onclick="showTab('login')">Se connecter</div>
+        <div class="tab" onclick="showTab('register')">S'inscrire</div>
+      </div>
+
+      <div id="form-login">
+        <h3>Bon retour cher citoyen Gabonais !!!</h3>
+        <p class="sub">Accédez à votre espace citoyen</p>
+        <div id="alert-login"></div>
+        <div class="form-group">
+          <label>Adresse email</label>
+          <input type="email" id="login-email" placeholder="votre@email.com">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="login-mdp" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary btn-full" onclick="seConnecter()">Se connecter</button>
+      </div>
+
+      <div id="form-register" style="display:none">
+        <h3>Créer un compte </h3>
+        <p class="sub">Rejoignez la plateforme citoyenne</p>
+        <div id="alert-register"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Prénom</label>
+            <input type="text" id="reg-prenom" placeholder="Karlos">
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="reg-nom" placeholder="NGUEMA">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="votre@email.com">
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input type="tel" id="reg-tel" placeholder="+241 XX XX XX XX">
+        </div>
+        <div class="form-group">
+          <label>Mot de passe</label>
+          <input type="password" id="reg-mdp" placeholder="Minimum 6 caractères">
+        </div>
+        <div class="form-group">
+          <label>Confirmer le mot de passe</label>
+          <input type="password" id="reg-mdp2" placeholder="Répétez le mot de passe">
+        </div>
+        <div class="check-group">
+          <input type="checkbox" id="check-cgu">
+          <label for="check-cgu">J'accepte les <a href="#" onclick="ouvrirModal('cgu'); return false;">Conditions d'utilisation</a></label>
+        </div>
+        <div class="check-group">
+          <input type="checkbox" id="check-privacy">
+          <label for="check-privacy">J'accepte la <a href="#" onclick="ouvrirModal('privacy'); return false;">Politique de confidentialité</a></label>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="sInscrire()">Créer mon compte</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div id="modal-cgu" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="fermerModal('cgu')">✕</button>
+    <h3>Conditions Générales d'Utilisation</h3>
+    <p style="color:gray; font-size:0.85rem; margin-bottom:14px;">Dernière mise à jour : Mars 2025</p>
+    <p style="font-size:0.88rem; line-height:1.8;">
+      <strong>1. Objet</strong><br>
+      GabPaper est une plateforme numérique destinée à faciliter les démarches administratives des citoyens gabonais.
+      <br><br>
+      <strong>2. Accès au service</strong><br>
+      L'accès est réservé aux citoyens gabonais majeurs résidant au Gabon ou à l'étranger.
+      <br><br>
+      <strong>3. Responsabilités</strong><br>
+      L'utilisateur s'engage à fournir des informations exactes. Toute fraude entraîne la suspension du compte.
+      <br><br>
+      <strong>4. Propriété intellectuelle</strong><br>
+      Tous les contenus de GabPaper sont protégés par les lois en vigueur au Gabon.
+    </p>
+    <div style="margin-top:20px; text-align:right;">
+      <button class="btn btn-primary" onclick="fermerModal('cgu')">J'ai compris</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-privacy" class="modal-bg" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="fermerModal('privacy')">✕</button>
+    <h3> Politique de Confidentialité</h3>
+    <p style="color:gray; font-size:0.85rem; margin-bottom:14px;">Dernière mise à jour : Mars 2025</p>
+    <p style="font-size:0.88rem; line-height:1.8;">
+      <strong>1. Données collectées</strong><br>
+      GabPaper collecte : nom, prénom, email, téléphone et documents soumis.
+      <br><br>
+      <strong>2. Utilisation des données</strong><br>
+      Vos données sont utilisées uniquement pour le traitement de vos demandes administratives.
+      <br><br>
+      <strong>3. Stockage</strong><br>
+      Les données sont stockées localement dans votre navigateur via LocalStorage. Aucune donnée n'est envoyée à un serveur externe.
+      <br><br>
+      <strong>4. Vos droits</strong><br>
+      Vous pouvez à tout moment demander la suppression de vos données personnelles.
+    </p>
+    <div style="margin-top:20px; text-align:right;">
+      <button class="btn btn-primary" onclick="fermerModal('privacy')">J'ai compris</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  © 2026 GabPaper — République Gabonaise   —  Institut Nationale de la Poste des Technologies de l'Information et de la Communication &nbsp;|&nbsp;
+  <a href="#" onclick="ouvrirModal('cgu'); return false;">CGU</a> &nbsp;|&nbsp;
+  <a href="#" onclick="ouvrirModal('privacy'); return false;">Confidentialité</a> &nbsp;|&nbsp;
+  Développé par <strong style="color:#FCD116">Alouba Sagesse</strong> &nbsp;|&nbsp;
+  Pour plus d'informations, nous vous prions de contacter le : <a href="tel:+241077622457" style="color:#FCD116">+241 077 62 24 57</a>
+</footer>
+
+<script src="app.js"></script>
+<script>
+
+if(localStorage.getItem("gab_user")) {
+  let u = JSON.parse(localStorage.getItem("gab_user"));
+  window.location.href = u.role === "admin" ? "admin.html" : "dashboard.html";
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(function(t, i) {
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function ouvrirModal(id) {
+  document.getElementById('modal-' + id).style.display = 'flex';
+}
+
+function fermerModal(id) {
+  document.getElementById('modal-' + id).style.display = 'none';
+}
+
+function seConnecter() {
+  let email = document.getElementById('login-email').value.trim();
+  let mdp   = document.getElementById('login-mdp').value.trim();
+  let alDiv = document.getElementById('alert-login');
+
+  if(!email || !mdp) {
+    alDiv.innerHTML = '<div class="alert alert-error">⚠️ Remplissez tous les champs.</div>';
+    return;
+  }
+
+  if(email === "admin@gabadmin.ga" && mdp === "admin123") {
+    let admin = { id:"admin", prenom:"Administrateur", nom:"", email:email, role:"admin" };
+    localStorage.setItem("gab_user", JSON.stringify(admin));
+    window.location.href = "admin.html";
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("gab_users") || "[]");
+  let user  = users.find(function(u) { return u.email === email && u.password === mdp; });
+
+  if(!user) {
+    alDiv.innerHTML = '<div class="alert alert-error">❌ Email ou mot de passe incorrect.</div>';
+    return;
+  }
+
+  localStorage.setItem("gab_user", JSON.stringify(user));
+  window.location.href = "dashboard.html";
+}
+
+function sInscrire() {
+  let prenom = document.getElementById('reg-prenom').value.trim();
+  let nom    = document.getElementById('reg-nom').value.trim();
+  let email  = document.getElementById('reg-email').value.trim();
+  let tel    = document.getElementById('reg-tel').value.trim();
+  let mdp    = document.getElementById('reg-mdp').value.trim();
+  let mdp2   = document.getElementById('reg-mdp2').value.trim();
+  let cgu    = document.getElementById('check-cgu').checked;
+  let priv   = document.getElementById('check-privacy').checked;
+  let alDiv  = document.getElementById('alert-register');
+
+  if(!prenom || !nom || !email || !tel || !mdp) {
+    alDiv.innerHTML = '<div class="alert alert-error">⚠️ Tous les champs sont obligatoires.</div>';
+    return;
+  }
+  if(mdp !== mdp2) {
+    alDiv.innerHTML = '<div class="alert alert-error">❌ Les mots de passe ne correspondent pas.</div>';
+    return;
+  }
+  if(mdp.length < 6) {
+    alDiv.innerHTML = '<div class="alert alert-error">❌ Mot de passe trop court (6 caractères min).</div>';
+    return;
+  }
+  if(!cgu || !priv) {
+    alDiv.innerHTML = '<div class="alert alert-error">❌ Acceptez les conditions et la politique de confidentialité.</div>';
+    return;
+  }
+
+  let users = JSON.parse(localStorage.getItem("gab_users") || "[]");
+
+  if(users.find(function(u) { return u.email === email; })) {
+    alDiv.innerHTML = '<div class="alert alert-error">❌ Cet email est déjà utilisé.</div>';
+    return;
+  }
+
+  let newUser = {
+    id: "USR-" + Date.now(),
+    prenom: prenom,
+    nom: nom,
+    email: email,
+    tel: tel,
+    password: mdp,
+    role: "citoyen",
+    dateInscription: new Date().toLocaleDateString('fr-FR')
+  };
+
+  users.push(newUser);
+  localStorage.setItem("gab_users", JSON.stringify(users));
+  localStorage.setItem("gab_user", JSON.stringify(newUser));
+
+  alDiv.innerHTML = '<div class="alert alert-success">✅ Compte créé ! Redirection...</div>';
+  setTimeout(function() { window.location.href = "dashboard.html"; }, 1200);
+}
+
+</script>
+
+</body>
+</html>
